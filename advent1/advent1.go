@@ -13,6 +13,13 @@ import (
 
 
 func PrepareData(pathToFile string) (map[int]int, map[int]int, error) {
+	// add a comment
+	file, err := os.Open(pathToFile)
+	defer file.Close()
+	 
+	if err != nil {
+		return nil, nil, err
+	}
 	
 }
 
