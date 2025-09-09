@@ -1,53 +1,50 @@
 package advent1
 
 import (
-	"unicode"
-	// "io"
+	"bufio"
 	"math"
 	"os"
-	"strconv"
 	"slices"
+	"strconv"
+	"strings"
 )
 
 
 
 
 func PrepareData(pathToFile string) ([]int, []int, error) {
-	data, err := os.ReadFile(pathToFile)
+	file, err := os.Open(pathToFile)
+	defer file.Close()
+	 
 	if err != nil {
 		return nil, nil, err
 	}
-
-	runeData := []rune(string(data))
-	var toAppend []rune
+	
+	// foreach line in file
+	scanner := bufio.NewScanner(file)
 	var numbers1 []int
 	var numbers2 []int
 
-	for _,v := range runeData {
-		if unicode.IsSpace(v) != true {
-			toAppend = append(toAppend, v)
-			continue
-		}
-		if len(toAppend) == 0 {
-			continue
-		}
-		
-		if v == '\t' {
-			numbers1, toAppend, err = AppendNumber(numbers1, toAppend)
-			if err != nil {
-				return nil, nil, err
-			}
-		} 
+	for scanner.Scan() {
+		// split by space/tab delimiter and store to num1 num2
+		line := scanner.Text()
 
-		if v == '\n' {
-			numbers2, toAppend, err = AppendNumber(numbers2, toAppend)
-		} else {
-			numbers1, toAppend, err = AppendNumber(numbers1, toAppend)
-		} 
+		lineSlice := strings.Fields(line)
+		// append num1 to slice1
+		num1, err := strconv.Atoi(lineSlice[0])
 		if err != nil {
 			return nil, nil, err
 		}
+		num2, err := strconv.Atoi(lineSlice[1])
+		if err != nil {
+			return nil, nil, err
+		}
+
+		numbers1 = append(numbers1, num1 )
+		// append num2 to slice2
+		numbers2 = append(numbers2, num2)
 	}
+
 	return numbers1, numbers2, nil
 }
 
