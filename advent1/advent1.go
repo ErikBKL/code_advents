@@ -1,100 +1,70 @@
 package advent1
 
 import (
-	"strconv"
-	"slices"
+	"unicode"
+	// "io"
 	"math"
 	"os"
+	"strconv"
+	"slices"
 )
 
 
 
 
-func PrepareData(pathToFile string) ([]int, error) {
+func PrepareData(pathToFile string) ([]int, []int, error) {
 	data, err := os.ReadFile(pathToFile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	runeData := []rune(string(data))
 	var toAppend []rune
-	var ret []int
+	var numbers1 []int
+	var numbers2 []int
+
 	for _,v := range runeData {
-		if v != '\n' {
+		if unicode.IsSpace(v) != true {
 			toAppend = append(toAppend, v)
 			continue
 		}
+		if len(toAppend) == 0 {
+			continue
+		}
 		
-		ret, toAppend, err = AppendNumber(ret, toAppend)
-		if err != nil {
-			return nil, err
-		}
-	}
+		if v == '\t' {
+			numbers1, toAppend, err = AppendNumber(numbers1, toAppend)
+			if err != nil {
+				return nil, nil, err
+			}
+		} 
 
-	if len(toAppend) > 0 {
-		ret, toAppend, err = AppendNumber(ret, toAppend)
+		if v == '\n' {
+			numbers2, toAppend, err = AppendNumber(numbers2, toAppend)
+		} else {
+			numbers1, toAppend, err = AppendNumber(numbers1, toAppend)
+		} 
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
-	return ret, nil
+	return numbers1, numbers2, nil
 }
 
 
 
-func AppendNumber(ret []int, toAppend []rune) ([]int, []rune, error) {
+func AppendNumber(slice []int, toAppend []rune) ([]int, []rune, error) {
 	numToInsert, err := strconv.Atoi(string(toAppend))
 	if err != nil {
-		return ret, toAppend, err
+		return slice, toAppend, err
 	}
 
-	ret = append(ret, numToInsert)
+	slice = append(slice, numToInsert)
 	toAppend = toAppend[:0]	
 
-	return ret, toAppend, nil
+	return slice, toAppend, nil
 }
 
-
-// func PreapreData (pathToFile string) ([]int, []int, error) {
-// 	// open file
-// 	// read the whole file into a buffer
-// 	data, err := os.ReadFile("./lists")
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-// 	runeData := []rune(string(data))
-// 	// iterate the buffer
-// 	var runes []rune
-// 	var numbers1 []int
-// 	var numbers2 []int
-
-// 	toAppend := 0
-
-// 	for _,v := range runeData {
-
-// 		// every time reach a tab append to slice1
-// 		if unicode.IsSpace(v) && v == '\t' {
-// 			toAppend, err = strconv.Atoi(string(runes))
-// 			if err != nil {
-// 				return nil, nil, err
-// 			}
-// 			numbers1 = append(numbers1, toAppend )
-// 			runes = runes[:0]
-// 			// every time reach a newline append to slice2
-// 		} else if  unicode.IsSpace(v) && v == '\n'{
-// 			toAppend, err = strconv.Atoi(string(runes))
-// 			if err != nil {
-// 				return nil, nil, err
-// 			}
-// 			numbers2 = append(numbers2,toAppend)
-// 			runes = runes[:0]
-// 		}
-		
-// 		runes = append(runes, v)
-// 	}
-
-// 	return numbers1, numbers2, nil
-// }		
 
 func TotalDistance(numbers1, numbers2 []int) int {
 
