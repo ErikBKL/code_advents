@@ -12,5 +12,6 @@ func TestTotalDistance(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Printf("%d", TotalDistance(got1, got2))
+	// fmt.Printf("TotalDistance: %d", TotalDistance(got1, got2))
+	fmt.Printf("SimilarityScore: %d", SimilarityScore(got1, got2))
 }

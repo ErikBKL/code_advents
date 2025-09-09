@@ -12,7 +12,7 @@ import (
 
 
 
-func PrepareData(pathToFile string) ([]int, []int, error) {
+func PrepareData(pathToFile string) (map[int]int, map[int]int, error) {
 	file, err := os.Open(pathToFile)
 	defer file.Close()
 	 
@@ -22,8 +22,8 @@ func PrepareData(pathToFile string) ([]int, []int, error) {
 	
 	// foreach line in file
 	scanner := bufio.NewScanner(file)
-	var numbers1 []int
-	var numbers2 []int
+	numbers1 := make(map[int]int)
+	numbers2 := make(map[int]int)
 
 	for scanner.Scan() {
 		// split by space/tab delimiter and store to num1 num2
@@ -40,28 +40,12 @@ func PrepareData(pathToFile string) ([]int, []int, error) {
 			return nil, nil, err
 		}
 
-		numbers1 = append(numbers1, num1 )
-		// append num2 to slice2
-		numbers2 = append(numbers2, num2)
+		numbers1[num1]++
+		numbers2[num2]++
 	}
 
 	return numbers1, numbers2, nil
 }
-
-
-
-func AppendNumber(slice []int, toAppend []rune) ([]int, []rune, error) {
-	numToInsert, err := strconv.Atoi(string(toAppend))
-	if err != nil {
-		return slice, toAppend, err
-	}
-
-	slice = append(slice, numToInsert)
-	toAppend = toAppend[:0]	
-
-	return slice, toAppend, nil
-}
-
 
 func TotalDistance(numbers1, numbers2 []int) int {
 
@@ -75,4 +59,14 @@ func TotalDistance(numbers1, numbers2 []int) int {
 	}
 
 	return sum
+}
+
+func SimilarityScore(leftList map[int]int, rightList map[int]int) int {
+
+	ret := 0
+	for k,_ := range leftList {
+		ret += k * rightList[k]
+	}
+
+	return ret
 }
