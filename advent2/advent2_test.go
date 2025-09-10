@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test(t *testing.T) {
+func TestStage1(t *testing.T) {
 
 	got, _ := AmountSafeReports("./test.txt")
 	want := 1
@@ -13,3 +13,14 @@ func Test(t *testing.T) {
 		t.Errorf("got %d want %d", got, want)
 	}
 }
+
+func TestStage2(t *testing.T) {
+
+	got, _ :=	AmountSafeReports("./stage2test.txt")
+	want := 4
+
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
+}
+

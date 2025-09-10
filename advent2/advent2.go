@@ -26,8 +26,12 @@ func AmountSafeReports(pathToFile string) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-			
-		isValid, err := IsValidReport(lineSlice)
+
+		numSlice, err := StrSliceToInts(lineSlice)
+		if err != nil {
+			return 0, err
+		}
+		isValid, err := IsValidReport(numSlice)
 		if err != nil {
 			return 0, err
 		}
@@ -37,6 +41,21 @@ func AmountSafeReports(pathToFile string) (int, error) {
 	}
 	
 	return ret, nil
+}
+
+func StrSliceToInts(lineSlice []string) ([]int, error) {
+	numSlice := make([]int, 0, len(lineSlice))
+
+	for i,_ := range lineSlice {
+		toAppend, err := GetIntAtIdx(lineSlice, i)
+		if err != nil {
+			return nil, err
+		}
+
+		numSlice = append(numSlice, toAppend )
+	}
+
+	return numSlice, nil
 }
 
 func MakeAscendingOrder(lineSlice []string) ([]string, error) {
@@ -56,17 +75,13 @@ func MakeAscendingOrder(lineSlice []string) ([]string, error) {
 	return lineSlice, nil
 }
 
-func GetCurrNext(lineSlice []string, idx int) (int, int, error) {
-	curr, err := strconv.Atoi(lineSlice[idx - 1])
+func GetIntAtIdx(lineSlice []string, idx int) (int, error) {
+	ret, err := strconv.Atoi(lineSlice[idx])
 	if err != nil {
-		return 0,0, err
-	}
-	next, err := strconv.Atoi(lineSlice[idx]) 
-	if err != nil {
-		return 0,0, err
+		return 0, err
 	}
 
-	return curr, next, nil
+	return ret, nil
 }
 
 func IsPairValid(curr, next int) bool {
@@ -76,45 +91,44 @@ func IsPairValid(curr, next int) bool {
 	return false
 }
 
-func IsValidReport(lineSlice []string )(bool, error) { 
+func IsValidReport(numSlice []int )(bool, error) { 
 
-	for nextIdx := 1 ; nextIdx < len(lineSlice)  ; nextIdx++ {
-		curr, next, err := GetCurrNext(lineSlice, nextIdx)
-		if err != nil {
-			return false, err
-		}
-
+	for idx := 0 ; idx < len(numSlice) - 1; idx++ {
+		curr := numSlice[idx]
+		next := numSlice[idx + 1]
+		
 		isValid := IsPairValid(curr, next)
 		if isValid == false {
-			return false, nil
+
+			isValid := TryMakeValidReport(numSlice, idx)
+
+			if isValid != true {
+				return false, nil
+			}
 		}
 	}
 	return true, nil
 }
 
-func ActivateDampener(lineSlice []string, nextIdx int) (bool, error){
+func TryMakeValidReport(numSlice []int, idx int) bool {
 
-	curr,err := strconv.Atoi(lineSlice[nextIdx - 1])
-	if err != nil {
-		return false, err
-	}
-	next,err := strconv.Atoi(lineSlice[nextIdx])
-	if err != nil {
-		return false, err
-	}
-	
-	if nextIdx + 1 == len(lineSlice) {
-		return true, nil
-	}
+	numSlice = append(numSlice[:idx], numSlice[idx+1:]...)
+		
+	return IsPureValidReport(numSlice, idx)
+}
 
-	afterNext, err := strconv.Atoi(lineSlice[nextIdx + 1])
-	if err != nil {
-		return false, err
+func IsPureValidReport(numSlice []int, idx int, ) bool {
+	i := idx - 1
+	if i < 0 {
+		i = 0
 	}
-
-	if IsPairValid(curr, afterNext) == true || 	IsPairValid(next, afterNext) == true {
-		return true, nil
+	for ; i < len(numSlice) - 1 ; i++ {
+		// foreach idx, tryremove from slice and check if report is pure valid
+		isValid := IsPairValid(numSlice[i], numSlice[i+1])
+		if isValid == false {
+			return false
+		}
 	}
 
-	return false, nil
+	return true
 }
