@@ -3,6 +3,7 @@ package advent2
 import (
 
 	"bufio"
+	"fmt"
 	"os"
 	"slices"
 	"strings"
@@ -85,7 +86,12 @@ func GetIntAtIdx(lineSlice []string, idx int) (int, error) {
 }
 
 func IsPairValid(curr, next int) bool {
-	if next - curr >= 1 && next - curr <= 3{
+	diff := next - curr
+	if diff < 0 {
+		diff = -1*diff
+	}
+
+	if diff >= 1 && diff <= 3{
 		return true		
 	}
 	return false
@@ -99,10 +105,10 @@ func IsValidReport(numSlice []int )(bool, error) {
 		
 		isValid := IsPairValid(curr, next)
 		if isValid == false {
-
-			isValid := TryMakeValidReport(numSlice, idx)
-
-			if isValid != true {
+			// if becomes valid by popping curr or next
+			if TryMakeValidReport(numSlice, idx) || TryMakeValidReport(numSlice, idx+1) {
+				return true ,nil
+			} else {
 				return false, nil
 			}
 		}
@@ -111,10 +117,17 @@ func IsValidReport(numSlice []int )(bool, error) {
 }
 
 func TryMakeValidReport(numSlice []int, idx int) bool {
+	
+	cpy := make([]int, len(numSlice))
+	
+	copy(cpy, numSlice)
+	
+	cpy = append(cpy[:idx], cpy[idx+1:]...)
 
-	numSlice = append(numSlice[:idx], numSlice[idx+1:]...)
-		
-	return IsPureValidReport(numSlice, idx)
+	fmt.Printf("cpy: %v\n", cpy)
+	isValid := IsPureValidReport(cpy, idx-1)
+
+	return isValid
 }
 
 func IsPureValidReport(numSlice []int, idx int, ) bool {

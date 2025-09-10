@@ -16,7 +16,7 @@ func TestStage1(t *testing.T) {
 
 func TestStage2(t *testing.T) {
 
-	got, _ :=	AmountSafeReports("./stage2test.txt")
+	got, _ :=	AmountSafeReports("./test.txt")
 	want := 4
 
 	if got != want {
