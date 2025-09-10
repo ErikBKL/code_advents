@@ -77,7 +77,6 @@ func IsPairValid(curr, next int) bool {
 }
 
 func IsValidReport(lineSlice []string )(bool, error) { 
-	dampenerWasActivated := false
 
 	for nextIdx := 1 ; nextIdx < len(lineSlice)  ; nextIdx++ {
 		curr, next, err := GetCurrNext(lineSlice, nextIdx)
@@ -86,18 +85,8 @@ func IsValidReport(lineSlice []string )(bool, error) {
 		}
 
 		isValid := IsPairValid(curr, next)
-		if isValid == false && dampenerWasActivated == false{
-			dampenerWasActivated = true
-			isValid, err = ActivateDampener(lineSlice, nextIdx)
-			if err != nil {
-				return false, err
-			}
-			
-			if isValid == false {
-				return false, nil
-			} 	else if isValid == false && dampenerWasActivated == true {
-				return false, nil
-			}
+		if isValid == false {
+			return false, nil
 		}
 	}
 	return true, nil
@@ -122,7 +111,7 @@ func ActivateDampener(lineSlice []string, nextIdx int) (bool, error){
 	if err != nil {
 		return false, err
 	}
-	
+
 	if IsPairValid(curr, afterNext) == true || 	IsPairValid(next, afterNext) == true {
 		return true, nil
 	}
