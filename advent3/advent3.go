@@ -1,8 +1,8 @@
 package advent3
 
 import (
-	// "bufio"
-	"errors"
+	"fmt"
+	"bufio"
 	"os"
 	"slices"
 	"strconv"
@@ -10,127 +10,134 @@ import (
 )
 
 func SumOfAllMul(pathToFile string) (int, error) {
-
-	bytesData, err := os.ReadFile(pathToFile)
+	file, err := os.Open(pathToFile)
 	if err != nil {
 		return 0, err
 	}
 
-	runeData := []rune(string(bytesData))
+	idx := 0
+	scanner := bufio.NewScanner(file)
+	
 	ret := 0
-	for idxMul := 0; idxMul < len(runeData)-1; idxMul++ {
 
-		idxMul, err = FindMul(runeData, idxMul)
-		if err != nil {
-			return ret, nil
-		}
+	for scanner.Scan() {
+		line := scanner.Text()
+		runeLine := []rune(line)
+		for  idx = 0 ; idx < len(runeLine) ; idx++ {
 
-		idxLeftParenthesis, err := FindLeftParenthesis(runeData, idxMul+3)
-		if idxLeftParenthesis != idxMul+3 {
-			idxMul = idxMul + 1
-			continue
-		}
+			// find mul return idxM
+			pos, isFound := FindMul(runeLine, idx )
+			if isFound != true {
+				break
+			}
+			idx = pos 
 
-		idxComma, err := FindComma(runeData, idxLeftParenthesis+1)
-		if err != nil {
-			idxMul = idxMul + 1
-			continue
+			if IsParenthesis(runeLine, idx+3) != true {
+				idx += 2
+				continue 
+			}
+			
+			
+			numLeft, idxAfterNum, err := ValidLeftNumber(runeLine, idx+4, idx+7)
+			if err != nil {
+				return 0, err
+			} else if idxAfterNum == -1 {
+				idx += 2
+				continue
+			}
+				
+				
+			if IsComma(runeLine, idxAfterNum) != true {
+				idx += 2
+				continue
+			}
+			
+			numRight, idxAfterNum, err := ValidRightNumber(runeLine, idxAfterNum+1, idxAfterNum + 4)
+			if err != nil {
+				return 0, err
+			} else if idxAfterNum == -1 {
+				idx += 2
+				continue
+			}
+						
+			ret += numLeft * numRight
+			idx += idxAfterNum + 1000
+			fmt.Printf("ret is %d\n", ret)
 		}
-		if idxComma > idxLeftParenthesis+4 {
-			idxMul = idxMul + 1
-			continue
-		}
-
-		idxRightParenthesis, err := FindRightParenthesis(runeData, idxComma+1)
-		if err != nil {
-			idxMul = idxMul + 1
-			continue
-		}
-		if idxRightParenthesis > idxComma+4 {
-			idxMul = idxMul + 1
-			continue
-		}
-
-		num1, err := ValidNumber(runeData, idxLeftParenthesis+1, idxComma)
-		if err != nil {
-			idxMul = idxMul + 1
-			continue
-		}
-		num2, err := ValidNumber(runeData, idxComma+1, idxRightParenthesis)
-		if err != nil {
-			idxMul = idxMul + 1
-			continue
-		}
-
-		ret += num1 * num2
-		idxMul = idxRightParenthesis
-
 	}
 
 	return ret, nil
 }
 
-func ValidNumber(buffer []rune, start, end int) (int, error) {
-	for i := start; i < end; i++ {
-		if !unicode.IsDigit(buffer[i]) {
-			return 0, errors.New("Invalid token")
-		}
+func ValidLeftNumber (runeLine []rune, start, end int ) (int, int, error) {
+	i := start
+	for ; i < end ; i++ {
+		if runeLine[i] == ',' && i > start { //happy path if found comma and digit is at least 1 long
+			break
+		} else if unicode.IsDigit(runeLine[i]) != true { //sad path if it's here and not a digit it's also not a comma
+			return 0, -1, nil
+		} 
 	}
 
-	num1, err := strconv.Atoi(string(buffer[start:end]))
+	ret, err := strconv.Atoi(string(runeLine[start:i]))
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
-	return num1, nil
+	return ret, i , nil
 }
 
-func FindTargetInSrc(target []rune, src []rune, startIdx int) (int, error) {
+
+func ValidRightNumber (runeLine []rune, start, end int ) (int, int, error) {
+	i := start
+	for ; i < end ; i++ {
+		if runeLine[i] == ')' && i > start { //happy path if found ) and digit is at least 1 long
+			break
+		} else if unicode.IsDigit(runeLine[i]) != true { //sad path if it's here and not a digit it's also not a )
+			return 0, -1, nil
+		} 
+	}
+
+	ret, err := strconv.Atoi(string(runeLine[start:i]))
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return ret, i , nil
+}
+
+
+func FindTargetInSrc(target []rune, src []rune, startIdx int) (int, bool) {
 	// assuming no whitespace
 
 	for i := startIdx; i < len(src)-(len(target)-1); i++ {
 		toInspect := src[i : i+len(target)]
 
 		if slices.Equal(toInspect, target) {
-			return i, nil
+			return i, true
 		}
 	}
 
-	return 0, errors.New("Target not found")
+	return 0, false
 }
 
-func FindMul(src []rune, idxStart int) (int, error) {
-	ret, err := FindTargetInSrc([]rune("mul"), src, idxStart)
-	if err != nil {
-		return 0, err
-	}
-
-	return ret, nil
+func FindMul(src []rune, idxStart int) (int, bool) {
+	ret, isFound := FindTargetInSrc([]rune("mul"), src, idxStart)
+	return ret, isFound
 }
 
-func FindLeftParenthesis(src []rune, idxAfterMul int) (int, error) {
-	ret, err := FindTargetInSrc([]rune("("), src, idxAfterMul)
-	if err != nil {
-		return 0, err
+func IsParenthesis(runeLine []rune, idx int) bool {
+	if runeLine[idx] != '(' {
+		return false
 	}
 
-	return ret, nil
+	return true
 }
 
-func FindComma(src []rune, idxAfterParenthesis int) (int, error) {
-	ret, err := FindTargetInSrc([]rune(","), src, idxAfterParenthesis)
-	if err != nil {
-		return 0, err
+func IsComma(runeLine []rune, idx int) bool {
+	if runeLine[idx] != ',' {
+		return false
 	}
 
-	return ret, nil
-}
-
-func FindRightParenthesis(src []rune, idxAfterComma int) (int, error) {
-	ret, err := FindTargetInSrc([]rune(")"), src, idxAfterComma)
-	if err != nil {
-		return 0, err
-	}
-
-	return ret, nil
+	return true
 }
