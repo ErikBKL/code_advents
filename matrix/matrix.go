@@ -1,0 +1,92 @@
+package matrix
+
+type Point struct {
+	X 		int
+	Y		int
+}
+
+type Matrix[T comparable] struct {
+	Size		int
+	Data 		[]T
+	Curr		Point
+}
+
+type Direction int
+
+const (
+	UP Direction = iota
+	RIGHT_UP
+	RIGHT
+	RIGHT_DOWN
+	DOWN
+	LEFT_DOWN
+	LEFT
+	LEFT_UP
+)
+
+func New[T comparable]() *Matrix[T] {
+	return &Matrix[T]{
+		Size:	0,
+		Data:	[]T{},
+		Curr:	Point{X: 0, Y: 0},
+	}
+}
+
+func (m *Matrix[T]) At(row, col int) T {
+	return m.Data[row * m.Size + col]
+}
+
+func (m *Matrix[T]) Set(row, col int, value T) {
+	m.Data[row * m.Size + col] = value
+}
+
+// If new size is smaller than current size, elements will be eliminated
+func (m *Matrix[T]) Resize(newSize int) {
+	
+}
+
+func (m *Matrix[T]) Length() int {
+	return m.Size
+}
+
+func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
+	var Neighbors = []Point{
+		{X: 0, Y: 1},	//up
+		{X: 1, Y: 1},	//up_right
+		{X: 1, Y: 0},	//right
+		{X: 1, Y: -1},	//right_down
+		{X: 0, Y: -1},	//down
+		{X: -1, Y: -1},	//down_left
+		{X: -1, Y: 0},	//left
+		{X: -1, Y: 1},	//upleft
+	}
+
+	switch dir {
+	case UP:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[UP].X, origin.Y + Neighbors[UP].Y})
+	case RIGHT_UP:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[RIGHT_UP].X, origin.Y + Neighbors[RIGHT_UP].Y})
+	case RIGHT:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[RIGHT].X, origin.Y + Neighbors[RIGHT].Y})
+	case RIGHT_DOWN:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[RIGHT_DOWN].X, origin.Y + Neighbors[RIGHT_DOWN].Y})
+	case DOWN:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[DOWN].X, origin.Y + Neighbors[DOWN].Y})
+	case LEFT_DOWN:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT_DOWN].X, origin.Y + Neighbors[LEFT_DOWN].Y})
+	case LEFT:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT].X, origin.Y + Neighbors[LEFT].Y})
+	case LEFT_UP:
+		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT_UP].X, origin.Y + Neighbors[LEFT_UP].Y})
+}
+
+	
+}
+
+func (m *Matrix[T])IsValidNeighbor( neighbor Point ) bool {
+	if neighbor.X >= 0 && neighbor.X < m.Size && neighbor.Y >= 0 && neighbor.Y < m.Size {
+		return true
+	}
+
+	return false
+}
