@@ -6,7 +6,8 @@ type Point struct {
 }
 
 type Matrix[T comparable] struct {
-	Size		int
+	Rows		int
+	Cols		int
 	Data 		[]T
 	Curr		Point
 }
@@ -26,27 +27,39 @@ const (
 
 func New[T comparable]() *Matrix[T] {
 	return &Matrix[T]{
-		Size:	0,
+		Rows:	0,
+		Cols:	0,
 		Data:	[]T{},
 		Curr:	Point{X: 0, Y: 0},
 	}
 }
 
 func (m *Matrix[T]) At(row, col int) T {
-	return m.Data[row * m.Size + col]
+	return m.Data[row * m.Cols + col]
 }
 
 func (m *Matrix[T]) Set(row, col int, value T) {
-	m.Data[row * m.Size + col] = value
+	m.Data[row * m.Cols + col] = value
 }
 
 // If new size is smaller than current size, elements will be eliminated
-func (m *Matrix[T]) Resize(newSize int) {
-	
+func (m *Matrix[T]) Resize(newRows, newCols int) {
+	m.Rows = newRows
+	m.Cols = newCols
+
+	oldSize := len(m.Data)
+	newSize := newRows * newCols
+	if oldSize > newSize { //shrink
+		m.Data = m.Data[ : newSize]
+	} else {
+		newData := make([]T, newSize)
+		copy(newData, m.Data)
+		m.Data = newData
+	}
 }
 
-func (m *Matrix[T]) Length() int {
-	return m.Size
+func (m *Matrix[T]) Size() int {
+	return cap(m.Data)
 }
 
 func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
@@ -78,13 +91,15 @@ func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
 		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT].X, origin.Y + Neighbors[LEFT].Y})
 	case LEFT_UP:
 		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT_UP].X, origin.Y + Neighbors[LEFT_UP].Y})
-}
+	default: //TODO verify
+		return false
+	}
 
 	
 }
 
 func (m *Matrix[T])IsValidNeighbor( neighbor Point ) bool {
-	if neighbor.X >= 0 && neighbor.X < m.Size && neighbor.Y >= 0 && neighbor.Y < m.Size {
+	if neighbor.X >= 0 && neighbor.X < m.Cols && neighbor.Y >= 0 && neighbor.Y < m.Rows {
 		return true
 	}
 
