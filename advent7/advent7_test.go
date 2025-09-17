@@ -12,3 +12,12 @@ func TestSplitTargetOperands(t *testing.T) {
 	}
 	t.Errorf("target: %d, operands: %v", target, operands)
 }
+
+func TestSumValidEquations(t *testing.T) {
+	got, _ := SumValidEquations("./test.txt")
+	want := 3749
+
+	if got != want {
+		t.Errorf("got: %d want: %d", got, want)
+	}
+}

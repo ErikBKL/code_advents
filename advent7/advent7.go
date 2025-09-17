@@ -2,9 +2,10 @@ package advent7
 
 import (
 	"bufio"
+	"math"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 
@@ -26,7 +27,7 @@ func SumValidEquations (pathToFile string) (int, error) {
 			return 0, err
 		}
 
-		if RecIsValidEquation(target, 0, operands) == true {
+		if RecIsValidEquation(target, operands[0], operands[1 : ]) == true {
 			ret += target
 		}
 	}
@@ -34,6 +35,35 @@ func SumValidEquations (pathToFile string) (int, error) {
 	return ret, nil
 }
 
+func RecIsValidEquation(target int, cumulativeRes int, operands []int) bool {
+	operators := []string{"+", "*", "||"}
+
+	if cumulativeRes == target && len(operands) == 0 { 
+		return true 
+	} else if len(operands) == 0  && cumulativeRes != target { 
+		return false
+	}
+
+	cumulative := 0
+	for _, op := range operators {
+		
+		switch op {
+		case "+":
+			cumulative = cumulativeRes + operands[0]
+		case "*":
+			cumulative = cumulativeRes * operands[0]
+		default:
+			lenToAppend := len([]rune(strconv.Itoa(operands[0])))
+			cumulative = cumulativeRes * int(math.Pow10(lenToAppend)) + operands[0]
+		}
+
+		isValid := RecIsValidEquation(target, cumulative, operands[1 : ])
+		if isValid == true {
+			return true
+		}
+	} 
+	return false
+}
 
 func SplitTargetOperands(input string) (int, []int, error) {
 	expression := strings.Split(input, ":")	
@@ -59,3 +89,4 @@ func SplitTargetOperands(input string) (int, []int, error) {
 
 	return intTarget, intOperands, nil
 }
+
