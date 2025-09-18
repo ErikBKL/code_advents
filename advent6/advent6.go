@@ -4,19 +4,21 @@ import (
 	// "slices"
 	"os"
 	"bufio"
+	// "fmt"
 
 	"erikberman.matrix.com"
 )
 const (
 	OCCUPIED 	=	'X'
 	GUARD		=	'^'
+	BLOCK		=	'#'
 )
 
-func CountDistinctPositions(pathToFile string) (int, error) {
+func CountDistinctPositions(pathToFile string) (*matrix.Matrix[rune], int, error) {
 	// read file into matrix
 	mtx, err := FileToMatrix(pathToFile)
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
 
 	curr := FindGuard(mtx)
@@ -33,14 +35,14 @@ func CountDistinctPositions(pathToFile string) (int, error) {
 
 		next := mtx.NextPoint(direction, curr)
 		
-		if mtx.At(next.Y, next.X) == GUARD {
+		for mtx.At(next.Y, next.X) == BLOCK {
 			direction = (direction + 2) % 8 //turn 90 degrees clockwise
 			next = mtx.NextPoint(direction, curr)
 		}
 		curr = next
 	}
 
-	return counter, nil
+	return mtx, counter, nil
 }
 
 func TryCaptureSpot( mtx *matrix.Matrix[rune], position matrix.Point, counter *int) {
@@ -73,13 +75,12 @@ func FileToMatrix (pathToFile string) (*matrix.Matrix[rune], error) {
 			isMatrixResize = true
 		}
 		
-		colToInsert := 0
-		for _, v := range runeLine {
-			mtx.Set(rowToInsert, colToInsert, v)
-			colToInsert++
+		for col, v := range runeLine {
+			mtx.Set(rowToInsert, col, v)
 		}
 		rowToInsert++
 	}
+	// fmt.Printf("matrix is: %+v", mtx)
 
 	return mtx, nil
 }
@@ -88,7 +89,7 @@ func FindGuard (mtx *matrix.Matrix[rune]) matrix.Point {
 	for r := 0 ; r < mtx.Rows ; r++ {
 		for c := 0 ; c < mtx.Cols ; c++ {
 			if mtx.At(r,c) == GUARD {
-				return matrix.Point{c,r}
+				return matrix.Point{X: c, Y: r}
 			}
 		}
 	}
