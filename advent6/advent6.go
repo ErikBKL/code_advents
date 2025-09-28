@@ -14,6 +14,45 @@ const (
 	BLOCK		=	'#'
 )
 
+func CountLoopMakingBlocks(pathToFile string)(*matrix.Matrix[rune], int, error) {
+	mtx, err := FileToMatrix(pathToFile)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	basePosition, curr := FindGuard(mtx)
+	direction := matrix.UP
+
+	counter := 0
+	
+	// place new barrier in basePosition
+	for ! mtx.IsNextValid(direction, curr) {
+
+		TryMakeLoop(mtx, direction, curr, &counter)
+
+	}
+
+	return nil, 0, nil
+}
+
+func TryMakeLoop(mtx *matrix.Matrix[rune], direction matrix.Direction, curr matrix.Point, counter *int) {
+	if ! mtx.IsNextValid(direction, curr) { //check out of board
+		return
+	}
+
+	next := mtx.NextPoint(direction, curr)
+
+	for mtx.At(next.Y, next.X) == BLOCK {
+		// add Collision{next, direction} to a map of collisions.
+		// if collisions[collision] > 1 
+		// do counter++
+		// return
+
+		// direction = (direction + 2) % 8 //turn 90 degrees clockwise
+		// next = mtx.NextPoint(direction, curr)
+	}
+}
+
 func CountDistinctPositions(pathToFile string) (*matrix.Matrix[rune], int, error) {
 	// read file into matrix
 	mtx, err := FileToMatrix(pathToFile)
