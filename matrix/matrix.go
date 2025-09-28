@@ -14,6 +14,17 @@ type Matrix[T comparable] struct {
 
 type Direction int
 
+var Neighbors = []Point{
+	{X: 0, Y: -1},	//up
+	{X: 1, Y: -1},	//up_right
+	{X: 1, Y: 0},	//right
+	{X: 1, Y: 1},	//right_down
+	{X: 0, Y: 1},	//down
+	{X: -1, Y: 1},	//down_left
+	{X: -1, Y: 0},	//left
+	{X: -1, Y: -1},	//upleft
+}
+
 const (
 	UP Direction = iota
 	RIGHT_UP
@@ -44,10 +55,11 @@ func (m *Matrix[T]) Set(row, col int, value T) {
 
 // If new size is smaller than current size, elements will be eliminated
 func (m *Matrix[T]) Resize(newRows, newCols int) {
+	oldSize := m.Rows * m.Cols
+
 	m.Rows = newRows
 	m.Cols = newCols
 
-	oldSize := len(m.Data)
 	newSize := newRows * newCols
 	if oldSize > newSize { //shrink
 		m.Data = m.Data[ : newSize]
@@ -63,16 +75,6 @@ func (m *Matrix[T]) Size() int {
 }
 
 func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
-	var Neighbors = []Point{
-		{X: 0, Y: 1},	//up
-		{X: 1, Y: 1},	//up_right
-		{X: 1, Y: 0},	//right
-		{X: 1, Y: -1},	//right_down
-		{X: 0, Y: -1},	//down
-		{X: -1, Y: -1},	//down_left
-		{X: -1, Y: 0},	//left
-		{X: -1, Y: 1},	//upleft
-	}
 
 	switch dir {
 	case UP:
@@ -94,9 +96,12 @@ func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
 	default: //TODO verify
 		return false
 	}
-
-	
 }
+
+func (m *Matrix[T]) NextPoint(dir Direction, origin Point) Point {
+	return Point{origin.X + Neighbors[dir].X, origin.Y + Neighbors[dir].Y}
+}
+
 
 func (m *Matrix[T])IsValidNeighbor( neighbor Point ) bool {
 	if neighbor.X >= 0 && neighbor.X < m.Cols && neighbor.Y >= 0 && neighbor.Y < m.Rows {
