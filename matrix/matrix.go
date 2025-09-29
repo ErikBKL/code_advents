@@ -1,15 +1,15 @@
 package matrix
 
 type Point struct {
-	X 		int
-	Y		int
+	X int
+	Y int
 }
 
 type Matrix[T comparable] struct {
-	Rows		int
-	Cols		int
-	Data 		[]T
-	Curr		Point
+	Rows int
+	Cols int
+	Data []T
+	Curr Point
 }
 
 type Direction int
@@ -27,19 +27,19 @@ const (
 
 func New[T comparable]() *Matrix[T] {
 	return &Matrix[T]{
-		Rows:	0,
-		Cols:	0,
-		Data:	[]T{},
-		Curr:	Point{X: 0, Y: 0},
+		Rows: 0,
+		Cols: 0,
+		Data: []T{},
+		Curr: Point{X: 0, Y: 0},
 	}
 }
 
 func (m *Matrix[T]) At(row, col int) T {
-	return m.Data[row * m.Cols + col]
+	return m.Data[row*m.Cols+col]
 }
 
 func (m *Matrix[T]) Set(row, col int, value T) {
-	m.Data[row * m.Cols + col] = value
+	m.Data[row*m.Cols+col] = value
 }
 
 // If new size is smaller than current size, elements will be eliminated
@@ -50,7 +50,7 @@ func (m *Matrix[T]) Resize(newRows, newCols int) {
 	oldSize := len(m.Data)
 	newSize := newRows * newCols
 	if oldSize > newSize { //shrink
-		m.Data = m.Data[ : newSize]
+		m.Data = m.Data[:newSize]
 	} else {
 		newData := make([]T, newSize)
 		copy(newData, m.Data)
@@ -64,14 +64,14 @@ func (m *Matrix[T]) Size() int {
 
 func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
 	var Neighbors = []Point{
-		{X: 0, Y: 1},	//up
-		{X: 1, Y: 1},	//up_right
-		{X: 1, Y: 0},	//right
-		{X: 1, Y: -1},	//right_down
-		{X: 0, Y: -1},	//down
-		{X: -1, Y: -1},	//down_left
-		{X: -1, Y: 0},	//left
-		{X: -1, Y: 1},	//upleft
+		{X: 0, Y: 1},   //up
+		{X: 1, Y: 1},   //up_right
+		{X: 1, Y: 0},   //right
+		{X: 1, Y: -1},  //right_down
+		{X: 0, Y: -1},  //down
+		{X: -1, Y: -1}, //down_left
+		{X: -1, Y: 0},  //left
+		{X: -1, Y: 1},  //upleft
 	}
 
 	switch dir {
@@ -95,10 +95,9 @@ func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
 		return false
 	}
 
-	
 }
 
-func (m *Matrix[T])IsValidNeighbor( neighbor Point ) bool {
+func (m *Matrix[T]) IsValidNeighbor(neighbor Point) bool {
 	if neighbor.X >= 0 && neighbor.X < m.Cols && neighbor.Y >= 0 && neighbor.Y < m.Rows {
 		return true
 	}
