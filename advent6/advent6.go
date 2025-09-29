@@ -23,16 +23,24 @@ type Collision struct {
 
 func CountLoopMakingBlocks(pathToFile string) (*matrix.Matrix[rune], int, error) {
 	mtx, err := FileToMatrix(pathToFile)
+	basePosition := FindGuard(mtx)
+	mtx, _, err = CountDistinctPositions(pathToFile)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	basePosition := FindGuard(mtx)
-	direction := matrix.UP
-	newBlockade := mtx.NextPoint(direction, basePosition)
-	counter := 0
+	// traverse the matrix and mark all points of X
+	s := []matrix.Point{}
+	for i,v := range mtx.Data {
+		if v == OCCUPIED {
+			s = append(s, mtx.IdxToPoint(i))
+		}
+	}
 	
-	for mtx.IsNextValid(direction, newBlockade) { //exit loop when get out of board 
+	counter := 0
+
+	// for mtx.IsNextValid(direction, newBlockade) { //exit loop when get out of board
+	for _, blockade := range s {
 		collisions := map[Collision]int{}
 		copyMtx := matrix.Matrix[rune]{
 			Rows: mtx.Rows,
@@ -40,11 +48,10 @@ func CountLoopMakingBlocks(pathToFile string) (*matrix.Matrix[rune], int, error)
 			Data: make([]rune, mtx.Cols*mtx.Rows),
 			Curr: basePosition,
 		}
-		
-		copy(copyMtx.Data, mtx.Data) 		//reset matrix on every re-run
 
-		LookForLoop(&copyMtx, basePosition, newBlockade, collisions, &counter)
-		newBlockade, direction = NextValidPoint(mtx, direction, newBlockade)
+		copy(copyMtx.Data, mtx.Data) //reset matrix on every re-run
+
+		LookForLoop(&copyMtx, basePosition, blockade, collisions, &counter)
 	}
 
 	return mtx, counter, nil
@@ -52,7 +59,7 @@ func CountLoopMakingBlocks(pathToFile string) (*matrix.Matrix[rune], int, error)
 
 func LookForLoop(mtx *matrix.Matrix[rune], basePosition matrix.Point, newBlockade matrix.Point, collisions map[Collision]int, counter *int) {
 	// Set the newBlockade on the mtx
-	mtx.Set(newBlockade.Y, newBlockade.X, BLOCK) 
+	mtx.Set(newBlockade.Y, newBlockade.X, BLOCK)
 
 	direction := matrix.UP
 	c := Collision{}
@@ -65,7 +72,6 @@ func LookForLoop(mtx *matrix.Matrix[rune], basePosition matrix.Point, newBlockad
 			c = Collision{next, direction}
 			collisions[c]++
 
-
 			if collisions[c] > 1 {
 				*counter++
 				return
@@ -74,12 +80,10 @@ func LookForLoop(mtx *matrix.Matrix[rune], basePosition matrix.Point, newBlockad
 			direction = (direction + 2) % 8 //turn 90 degrees clockwise
 			next = mtx.NextPoint(direction, basePosition)
 		}
-		
+
 		basePosition = next
 	}
 }
-
-
 
 func NextValidPoint(mtx *matrix.Matrix[rune], direction matrix.Direction, curr matrix.Point) (matrix.Point, matrix.Direction) {
 	next := mtx.NextPoint(direction, curr)
@@ -92,7 +96,6 @@ func NextValidPoint(mtx *matrix.Matrix[rune], direction matrix.Direction, curr m
 
 	return curr, direction
 }
-
 
 func CountDistinctPositions(pathToFile string) (*matrix.Matrix[rune], int, error) {
 	// read file into matrix

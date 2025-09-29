@@ -110,3 +110,11 @@ func (m *Matrix[T])IsValidNeighbor( neighbor Point ) bool {
 
 	return false
 }
+
+
+func (m *Matrix[T])IdxToPoint(idx int) Point {
+	return Point{
+		X: idx % m.Rows,
+		Y: idx/m.Rows,
+	}
+}

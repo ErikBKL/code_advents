@@ -1,0 +1,11 @@
+{
+  "go.testExplorer.enable": true,
+  "go.testOnSave": false,
+  "go.testFlags": ["-v", "-count=1"],
+  "go.useLanguageServer": true,
+  "go.toolsManagement.autoUpdate": true,
+  "go.enableCodeLens": {
+    "references": true,
+    "runtest": true
+  }
+}
