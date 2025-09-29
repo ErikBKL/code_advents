@@ -6,9 +6,9 @@ import (
 
 func TestStage1(t *testing.T) {
 
-	got, _ := AmountSafeReports("./test.txt")
-	want := 1
-	
+	got, _ := AmountSafeReports("./sample_part1.txt")
+	want := 2
+
 	if got != want {
 		t.Errorf("got %d want %d", got, want)
 	}
@@ -16,11 +16,10 @@ func TestStage1(t *testing.T) {
 
 func TestStage2(t *testing.T) {
 
-	got, _ :=	AmountSafeReports("./test.txt")
+	got, _ := AmountSafeReportsWithDampener("test.txt")
 	want := 4
 
 	if got != want {
 		t.Errorf("got %d want %d", got, want)
 	}
 }
-

@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Go: Launch current package",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/advent2",
+        "args": []
+      },
+      {
+        "name": "Go: Debug tests in current package",
+        "type": "go",
+        "request": "launch",
+        "mode": "test",
+        "program": "${workspaceFolder}/advent2"
+      }
+    ]
+  }

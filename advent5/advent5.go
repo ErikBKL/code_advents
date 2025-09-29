@@ -7,6 +7,53 @@ import (
 	"strings"
 	"slices"
 )
+func SumMidPageInvalidUpdates(pathToFile string)(int, error) {
+	file, err := os.Open(pathToFile)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	m, err := CreateMap (scanner)
+	if err != nil {
+		return 0, err
+	}
+	ret := 0
+	for {
+		update, isFinish := GetUpdate(scanner)
+		if isFinish {
+			break
+		}
+
+		if ! IsUpdateValid(m, update) {
+			SortInvalidUpdate(m, update)
+			res, err := ValueMidNumber(update)
+			if err != nil {
+				return 0, err
+			}
+
+			ret += res
+		}
+	}
+
+	return ret, nil
+}
+
+func SortInvalidUpdate(m map[string][]string, update []string) {
+	for i := 1 ; i < len(update) ; i++ {
+		curr := update[i]
+		leftOfCurr := update[0 : i]
+		
+		for j := 0 ; j < len(leftOfCurr) ; j++ {
+			if slices.Contains(m[curr], leftOfCurr[j]) {
+				update[i], update[j] = update[j], update[i]
+			}
+		}	
+	}
+}
+
 
 func SumMidPageValidUpdates(pathToFile string) (int, error) {
 	file, err := os.Open(pathToFile)
@@ -58,7 +105,7 @@ func ValueMidNumber(update []string) (int, error) {
 
 func IsUpdateValid(m map[string][]string, update []string) bool {
 
-	// iterate update from end to start:
+	// foreach number in updates from end to start, 
 	for i := len(update)-1 ; i >= 0 ; i-- {
 		// look up element in map.
 		toInspect := update[i]
@@ -66,16 +113,16 @@ func IsUpdateValid(m map[string][]string, update []string) bool {
 		if ! isExist {
 			continue
 		}
-
-		if IsRulesViolated(rules, update[0 : i + 1]) {
+		
+		// if any of the numbers in his rule show up in updates before him - non valid update
+		if IsNumberOutOfPlace(rules, update[0 : i + 1]) {
 			return false
 		}
 	}
 	return true
 }
 
-func IsRulesViolated(rules []string, update []string ) bool {
-	
+func IsNumberOutOfPlace(rules []string, update []string ) bool {
 	for _,v := range rules {
 		if slices.Contains(update, v) {
 			return true

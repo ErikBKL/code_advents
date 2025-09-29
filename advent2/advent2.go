@@ -1,13 +1,10 @@
 package advent2
 
 import (
-
 	"bufio"
-	"fmt"
 	"os"
-	"slices"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 func AmountSafeReports(pathToFile string) (int, error) {
@@ -21,59 +18,37 @@ func AmountSafeReports(pathToFile string) (int, error) {
 
 	ret := 0
 	for scanner.Scan() {
-		// 	put line in slice
 		lineSlice := strings.Fields(scanner.Text())
-		lineSlice, err := MakeAscendingOrder(lineSlice)
-		if err != nil {
-			return 0, err
+		if len(lineSlice) == 0 {
+			continue
 		}
 
 		numSlice, err := StrSliceToInts(lineSlice)
 		if err != nil {
 			return 0, err
 		}
-		isValid, err := IsValidReport(numSlice)
-		if err != nil {
-			return 0, err
-		}
-		if  isValid== true {
-			ret++	
+
+		if isSafe(numSlice) {
+			ret++
 		}
 	}
-	
-	return ret, nil
+
+	return ret, scanner.Err()
 }
 
 func StrSliceToInts(lineSlice []string) ([]int, error) {
 	numSlice := make([]int, 0, len(lineSlice))
 
-	for i,_ := range lineSlice {
+	for i := range lineSlice {
 		toAppend, err := GetIntAtIdx(lineSlice, i)
 		if err != nil {
 			return nil, err
 		}
 
-		numSlice = append(numSlice, toAppend )
+		numSlice = append(numSlice, toAppend)
 	}
 
 	return numSlice, nil
-}
-
-func MakeAscendingOrder(lineSlice []string) ([]string, error) {
-	curr, err := strconv.Atoi(lineSlice[0])
-	if err != nil {
-		return nil, err
-	}
-	next, err := strconv.Atoi(lineSlice[1])
-	if err != nil {
-		return nil, err
-	}
-
-	if curr > next {
-		slices.Reverse(lineSlice)
-	}
-
-	return lineSlice, nil
 }
 
 func GetIntAtIdx(lineSlice []string, idx int) (int, error) {
@@ -85,63 +60,76 @@ func GetIntAtIdx(lineSlice []string, idx int) (int, error) {
 	return ret, nil
 }
 
-func IsPairValid(curr, next int) bool {
-	diff := next - curr
-	if diff < 0 {
-		diff = -1*diff
+// isSafe validates a report per Day 2 Part 1 rules.
+func isSafe(nums []int) bool {
+
+	increasing := nums[1] > nums[0]
+
+	for i := 1; i < len(nums); i++ {
+		diff := nums[i] - nums[i-1]
+		if diff == 0 {
+			return false
+		}
+		if diff > 0 && !increasing {
+			return false
+		}
+		if diff < 0 && increasing {
+			return false
+		}
+		if diff > 3 || diff < -3 {
+			return false
+		}
+	}
+	return true
+}
+
+// AmountSafeReportsWithDampener counts safe reports allowing removal of one level.
+func AmountSafeReportsWithDampener(pathToFile string) (int, error) {
+	file, err := os.Open(pathToFile)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	ret := 0
+	for scanner.Scan() {
+		lineSlice := strings.Fields(scanner.Text())
+		if len(lineSlice) == 0 {
+			continue
+		}
+
+		numSlice, err := StrSliceToInts(lineSlice)
+		if err != nil {
+			return 0, err
+		}
+
+		if isSafe(numSlice) || isSafeWithOneRemoval(numSlice) {
+			ret++
+		}
 	}
 
-	if diff >= 1 && diff <= 3{
-		return true		
+	return ret, scanner.Err()
+}
+
+func isSafeWithOneRemoval(nums []int) bool {
+	for i := 0; i < len(nums); i++ {
+		if isSafe(skipIndex(nums, i)) {
+			return true
+		}
 	}
 	return false
 }
 
-func IsValidReport(numSlice []int )(bool, error) { 
-
-	for idx := 0 ; idx < len(numSlice) - 1; idx++ {
-		curr := numSlice[idx]
-		next := numSlice[idx + 1]
-		
-		isValid := IsPairValid(curr, next)
-		if isValid == false {
-			// if becomes valid by popping curr or next
-			if TryMakeValidReport(numSlice, idx) || TryMakeValidReport(numSlice, idx+1) {
-				return true ,nil
-			} else {
-				return false, nil
-			}
+func skipIndex(nums []int, skip int) []int {
+	// res := make([]int, 0, len(nums)-1)
+	res := []int{}
+	for i := 0; i < len(nums); i++ {
+		if i == skip {
+			continue
 		}
+		res = append(res, nums[i])
 	}
-	return true, nil
-}
-
-func TryMakeValidReport(numSlice []int, idx int) bool {
-	
-	cpy := make([]int, len(numSlice))
-	
-	copy(cpy, numSlice)
-	
-	cpy = append(cpy[:idx], cpy[idx+1:]...)
-
-	fmt.Printf("cpy: %v\n", cpy)
-	isValid := IsPureValidReport(cpy, idx-1)
-
-	return isValid
-}
-
-func IsPureValidReport(numSlice []int, idx int, ) bool {
-	i := idx - 1
-	if i < 0 {
-		i = 0
-	}
-	for ; i < len(numSlice) - 1 ; i++ {
-		// foreach idx, tryremove from slice and check if report is pure valid
-		isValid := IsPairValid(numSlice[i], numSlice[i+1])
-		if isValid == false {
-			return false
-		}
-	}
-
-	return true
+	return res
 }
