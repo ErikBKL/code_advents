@@ -5,7 +5,7 @@ import(
 )
 func TestUniqueAntinodes(t *testing.T) {
 	got, _ := UniqueAntinodes("./test.txt")
-	want := 13
+	want := 34
 
 	if got != want {
 		t.Errorf("got %d want %d", got, want)

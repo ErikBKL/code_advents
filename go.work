@@ -1,9 +1,0 @@
-go 1.25.1
-
-use (
-	.
-	./advent6
-	./advent7
-	./matrix
-	./scratchpad
-)

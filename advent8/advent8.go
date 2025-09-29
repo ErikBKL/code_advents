@@ -104,7 +104,6 @@ func AllAntinodes(mtx *matrix.Matrix[rune], pointA matrix.Point, pointB matrix.P
 		}
 	
 	case pointA.Y == pointB.Y:
-		antinodes[0].Y, antinodes[1].Y = pointA.Y, pointB.Y
 		if pointA.X < pointB.X {
 
 			deltaXA = -deltaX
@@ -122,13 +121,13 @@ func AllAntinodes(mtx *matrix.Matrix[rune], pointA matrix.Point, pointB matrix.P
 	nA := pointA
 	for mtx.IsValidPoint(nA) {
 		antinodes = append(antinodes, nA)
-		nA = NextAntinode(pointA, deltaXA, deltaYA)
+		nA = NextAntinode(nA, deltaXA, deltaYA)
 	}
 
 	nA = pointB
 	for mtx.IsValidPoint(nA) {
 		antinodes = append(antinodes, nA)
-		nA = NextAntinode(pointB, deltaXB, deltaYB)
+		nA = NextAntinode(nA, deltaXB, deltaYB)
 	}
 
 	return antinodes

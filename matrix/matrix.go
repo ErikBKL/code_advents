@@ -78,21 +78,21 @@ func (m *Matrix[T]) IsNextValid(dir Direction, origin Point) bool {
 
 	switch dir {
 	case UP:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[UP].X, origin.Y + Neighbors[UP].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[UP].X, origin.Y + Neighbors[UP].Y})
 	case RIGHT_UP:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[RIGHT_UP].X, origin.Y + Neighbors[RIGHT_UP].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[RIGHT_UP].X, origin.Y + Neighbors[RIGHT_UP].Y})
 	case RIGHT:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[RIGHT].X, origin.Y + Neighbors[RIGHT].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[RIGHT].X, origin.Y + Neighbors[RIGHT].Y})
 	case RIGHT_DOWN:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[RIGHT_DOWN].X, origin.Y + Neighbors[RIGHT_DOWN].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[RIGHT_DOWN].X, origin.Y + Neighbors[RIGHT_DOWN].Y})
 	case DOWN:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[DOWN].X, origin.Y + Neighbors[DOWN].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[DOWN].X, origin.Y + Neighbors[DOWN].Y})
 	case LEFT_DOWN:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT_DOWN].X, origin.Y + Neighbors[LEFT_DOWN].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[LEFT_DOWN].X, origin.Y + Neighbors[LEFT_DOWN].Y})
 	case LEFT:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT].X, origin.Y + Neighbors[LEFT].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[LEFT].X, origin.Y + Neighbors[LEFT].Y})
 	case LEFT_UP:
-		return m.IsValidNeighbor(Point{origin.X + Neighbors[LEFT_UP].X, origin.Y + Neighbors[LEFT_UP].Y})
+		return m.IsValidPoint(Point{origin.X + Neighbors[LEFT_UP].X, origin.Y + Neighbors[LEFT_UP].Y})
 	default: //TODO verify
 		return false
 	}
@@ -103,7 +103,7 @@ func (m *Matrix[T]) NextPoint(dir Direction, origin Point) Point {
 }
 
 
-func (m *Matrix[T])IsValidNeighbor( neighbor Point ) bool {
+func (m *Matrix[T])IsValidPoint( neighbor Point ) bool {
 	if neighbor.X >= 0 && neighbor.X < m.Cols && neighbor.Y >= 0 && neighbor.Y < m.Rows {
 		return true
 	}
