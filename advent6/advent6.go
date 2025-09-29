@@ -28,8 +28,8 @@ func CountLoopMakingBlocks(pathToFile string) (*matrix.Matrix[rune], int, error)
 	}
 
 	basePosition := FindGuard(mtx)
-	newBlockade := basePosition
 	direction := matrix.UP
+	newBlockade := mtx.NextPoint(direction, basePosition)
 	counter := 0
 	
 	for mtx.IsNextValid(direction, newBlockade) { //exit loop when get out of board 
@@ -59,15 +59,12 @@ func LookForLoop(mtx *matrix.Matrix[rune], basePosition matrix.Point, newBlockad
 	// for is next valid
 	for mtx.IsNextValid(direction, basePosition) { //exit loop when get out of board
 		next := mtx.NextPoint(direction, basePosition)
-		isMarked := false
 		for mtx.At(next.Y, next.X) == BLOCK {
 
-			if isMarked == false {
-				// add Collision{next, direction} to a map of collisions.
-				c = Collision{next, direction}
-				collisions[c]++
-				isMarked = true
-			}
+			// add Collision{next, direction} to a map of collisions.
+			c = Collision{next, direction}
+			collisions[c]++
+
 
 			if collisions[c] > 1 {
 				*counter++
@@ -78,7 +75,7 @@ func LookForLoop(mtx *matrix.Matrix[rune], basePosition matrix.Point, newBlockad
 			next = mtx.NextPoint(direction, basePosition)
 		}
 		
-		basePosition = mtx.NextPoint(direction, basePosition)
+		basePosition = next
 	}
 }
 
