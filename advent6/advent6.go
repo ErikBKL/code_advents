@@ -27,69 +27,75 @@ func CountLoopMakingBlocks(pathToFile string) (*matrix.Matrix[rune], int, error)
 		return nil, 0, err
 	}
 
-	basePosition, curr := FindGuard(mtx)
+	basePosition := FindGuard(mtx)
+	newBlockade := basePosition
 	direction := matrix.UP
-
 	counter := 0
-
-	// place new barrier in basePosition
 	
-	for mtx.IsNextValid(direction, curr) { //exit loop when get out of board
-		
+	for mtx.IsNextValid(direction, newBlockade) { //exit loop when get out of board 
+		collisions := map[Collision]int{}
 		copyMtx := matrix.Matrix[rune]{
 			Rows: mtx.Rows,
 			Cols: mtx.Cols,
 			Data: make([]rune, mtx.Cols*mtx.Rows),
-			Curr: curr,
+			Curr: basePosition,
 		}
 		
 		copy(copyMtx.Data, mtx.Data) 		//reset matrix on every re-run
-		collisions := map[Collision]int{} 	//reset map on every re-run
 
-		TryMakeLoop(&copyMtx, direction, basePosition, curr, &counter, collisions)
-
-		if !mtx.IsNextValid(direction, curr) { //check out of board
-			break
-		}
-
-		next := mtx.NextPoint(direction, curr)
-
-		for mtx.At(next.Y, next.X) == BLOCK {
-			direction = (direction + 2) % 8 //turn 90 degrees clockwise
-			next = mtx.NextPoint(direction, curr)
-		}
-		curr = next
+		LookForLoop(&copyMtx, basePosition, newBlockade, collisions, &counter)
+		newBlockade, direction = NextValidPoint(mtx, direction, newBlockade)
 	}
 
 	return mtx, counter, nil
 }
 
-func TryMakeLoop(mtx *matrix.Matrix[rune], direction matrix.Direction, basePosition, currNewBlock matrix.Point, counter *int, collisions map[Collision]int) {
-	if !mtx.IsNextValid(direction, currNewBlock) { //check out of board
-		return
-	}
+func LookForLoop(mtx *matrix.Matrix[rune], basePosition matrix.Point, newBlockade matrix.Point, collisions map[Collision]int, counter *int) {
+	// Set the newBlockade on the mtx
+	mtx.Set(newBlockade.Y, newBlockade.X, BLOCK) 
 
-	mtx.Set(currNewBlock.Y, currNewBlock.X, BLOCK) //new block 
-
-	next := basePosition
-
-	for mtx.IsNextValid(direction, next) { //exit loop when get out of board
-
+	direction := matrix.UP
+	c := Collision{}
+	// for is next valid
+	for mtx.IsNextValid(direction, basePosition) { //exit loop when get out of board
+		next := mtx.NextPoint(direction, basePosition)
+		isMarked := false
 		for mtx.At(next.Y, next.X) == BLOCK {
-			// add Collision{next, direction} to a map of collisions.
-			c := Collision{next, direction}
-			collisions[c]++
+
+			if isMarked == false {
+				// add Collision{next, direction} to a map of collisions.
+				c = Collision{next, direction}
+				collisions[c]++
+				isMarked = true
+			}
+
 			if collisions[c] > 1 {
 				*counter++
 				return
 			}
 
 			direction = (direction + 2) % 8 //turn 90 degrees clockwise
+			next = mtx.NextPoint(direction, basePosition)
 		}
 		
-		next = mtx.NextPoint(direction, next)
+		basePosition = mtx.NextPoint(direction, basePosition)
 	}
 }
+
+
+
+func NextValidPoint(mtx *matrix.Matrix[rune], direction matrix.Direction, curr matrix.Point) (matrix.Point, matrix.Direction) {
+	next := mtx.NextPoint(direction, curr)
+
+	for mtx.At(next.Y, next.X) == BLOCK {
+		direction = (direction + 2) % 8 //turn 90 degrees clockwise
+		next = mtx.NextPoint(direction, curr)
+	}
+	curr = next
+
+	return curr, direction
+}
+
 
 func CountDistinctPositions(pathToFile string) (*matrix.Matrix[rune], int, error) {
 	// read file into matrix

@@ -7,6 +7,27 @@ import (
 
 )
 
+func TestCountLoopMakingBlocks(t *testing.T) {
+	mtx, got, err := CountLoopMakingBlocks("./test.txt")
+
+	if err != nil {
+		t.Fatalf("Unexpected error")
+	}
+
+	want := 6
+
+	if got != want {
+		t.Errorf("want: %d, got : %d", want, got)
+		for r := 0 ; r < mtx.Rows ; r++ {
+			for c :=0 ; c < mtx.Cols ; c++ {
+				fmt.Printf("%c", mtx.At(r,c))
+			}
+			fmt.Printf("\n")
+		}
+	}
+}
+
+
 
 func TestCountDistinctPositions(t *testing.T) {
 
