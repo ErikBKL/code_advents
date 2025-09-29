@@ -36,7 +36,7 @@ func MarkAntinodesOfTarget(mtx *matrix.Matrix[rune], target []matrix.Point, vali
 
 	for i := 0 ; i < len(target) - 1 ; i++ {
 		for j := i + 1 ; j < len(target) ; j++ {
-			antinodes = TwoAntinodes(target[i], target[j])
+			antinodes = AllAntinodes(mtx, target[i], target[j])
 			RegisterValidAntinodes(mtx, antinodes, validAntinodes)
 		}
 	}
@@ -50,58 +50,85 @@ func RegisterValidAntinodes(mtx *matrix.Matrix[rune], antinodes []matrix.Point, 
 	}
 }
 
-func TwoAntinodes(pointA matrix.Point, pointB matrix.Point) []matrix.Point {
+func NextAntinode(point matrix.Point, deltaX, deltaY int) matrix.Point {
+	return matrix.Point{
+		X: point.X + deltaX, 
+		Y: point.Y + deltaY,
+	}
+}
+
+func AllAntinodes(mtx *matrix.Matrix[rune], pointA matrix.Point, pointB matrix.Point) []matrix.Point {
 	deltaX := Abs(pointB.X - pointA.X)
 	deltaY := Abs(pointB.Y - pointA.Y)
 	
-	antinodes := make([]matrix.Point, 2)
-	
+	deltaXA, deltaYA, deltaXB, deltaYB := 0,0,0,0
+	antinodes := []matrix.Point{}
+
 	switch {
 	case pointA.X < pointB.X && pointA.Y < pointB.Y:
-		
-		antinodes[0].X = pointA.X - deltaX
-		antinodes[0].Y = pointA.Y - deltaY
-		antinodes[1].X = pointB.X + deltaX
-		antinodes[1].Y = pointB.Y + deltaY
+		deltaXA = -deltaX
+		deltaYA = -deltaY
+		deltaXB = deltaX
+		deltaYB = deltaY
 	
 	case pointA.X < pointB.X && pointA.Y > pointB.Y:
-		antinodes[0].X = pointA.X - deltaX
-		antinodes[0].Y = pointA.Y + deltaY
-		antinodes[1].X = pointB.X + deltaX
-		antinodes[1].Y = pointB.Y - deltaY
+		deltaXA = -deltaX
+		deltaYA = deltaY
+		deltaXB = deltaX
+		deltaYB = -deltaY
 	
 	case pointA.X > pointB.X && pointA.Y < pointB.Y:
-		antinodes[0].X = pointA.X + deltaX
-		antinodes[0].Y = pointA.Y - deltaY
-		antinodes[1].X = pointB.X - deltaX
-		antinodes[1].Y = pointB.Y + deltaY
-
+		deltaXA = deltaX
+		deltaYA = -deltaY
+		deltaXB = -deltaX
+		deltaYB = deltaY
+	
 	case pointA.X > pointB.X && pointA.Y > pointB.Y:
-		antinodes[0].X = pointA.X + deltaX
-		antinodes[0].Y = pointA.Y + deltaY
-		antinodes[1].X = pointB.X - deltaX
-		antinodes[1].Y = pointB.Y - deltaY
+		deltaXA = deltaX
+		deltaYA = deltaY
+		deltaXB = -deltaX
+		deltaYB = -deltaY
 	
 	case pointA.X == pointB.X:
-		antinodes[0].X, antinodes[1].X = pointA.X, pointB.X
 		
 		if pointA.Y < pointB.Y {
-			antinodes[0].Y = pointA.Y - deltaY
-			antinodes[1].Y = pointB.Y + deltaY
+			deltaXA = deltaX
+			deltaYA = -deltaY
+			deltaXB = deltaX
+			deltaYB = deltaY
 		} else {
-			antinodes[0].Y = pointA.Y + deltaY
-			antinodes[1].Y = pointB.Y - deltaY
+			deltaXA = deltaX
+			deltaYA = deltaY
+			deltaXB = deltaX
+			deltaYB = -deltaY
 		}
 	
 	case pointA.Y == pointB.Y:
 		antinodes[0].Y, antinodes[1].Y = pointA.Y, pointB.Y
 		if pointA.X < pointB.X {
-			antinodes[0].X = pointA.X - deltaX
-			antinodes[1].X = pointB.X + deltaX
+
+			deltaXA = -deltaX
+			deltaYA = deltaY
+			deltaXB = deltaX
+			deltaYB = deltaY
 		}else {
-			antinodes[0].X = pointA.X + deltaX
-			antinodes[1].X = pointB.X - deltaX
+			deltaXA = deltaX
+			deltaYA = deltaY
+			deltaXB = -deltaX
+			deltaYB = deltaY
 		}
+	}
+
+	nA := pointA
+	for mtx.IsValidPoint(nA) {
+		antinodes = append(antinodes, nA)
+		nA = NextAntinode(pointA, deltaXA, deltaYA)
+	}
+
+	nA = pointB
+	for mtx.IsValidPoint(nA) {
+		antinodes = append(antinodes, nA)
+		nA = NextAntinode(pointB, deltaXB, deltaYB)
 	}
 
 	return antinodes
