@@ -68,18 +68,17 @@ func CompressDiskImg(diskImg []rune) []rune {
 		// rightRunner = right
 		for diskImg[right] != FREESPACE && diskImg[left] == FREESPACE && left < right {
 
-			endFreeChunk, blockLen := StatsFreeChunk(diskImg, left)
-			startBlock, endBlock, isMatch := TryFindFittingBlock(diskImg, right, blockLen, endFreeChunk)
+			endFreeChunk, freeChunkLen := StatsFreeChunk(diskImg, left)
+			startBlock, endBlock, isMatch := TryFindFittingBlock(diskImg, right, freeChunkLen, endFreeChunk)
 			if isMatch {
 				tmp := slices.Clone(diskImg[left:endFreeChunk])
 				copy(diskImg[left:endFreeChunk], diskImg[startBlock:endBlock])
 				copy(diskImg[startBlock:endBlock], tmp)
-				right = startBlock - 1
 			} else {
 				right = EndOfPrevBlock(diskImg, right)
 			}
 
-			left += blockLen
+			left += endBlock - startBlock
 		}
 
 		for diskImg[left] != FREESPACE && left < right {
@@ -102,7 +101,7 @@ func EndOfPrevBlock(diskImg []rune, right int) int {
 	return right
 }
 
-func TryFindFittingBlock(diskImg []rune, right, blockLen, freeSpaceLimit int) (int, int, bool) {
+func TryFindFittingBlock(diskImg []rune, right, freeChunkLen, freeSpaceLimit int) (int, int, bool) {
 	leftOfBlock := right
 
 	for leftOfBlock > freeSpaceLimit {
@@ -110,7 +109,7 @@ func TryFindFittingBlock(diskImg []rune, right, blockLen, freeSpaceLimit int) (i
 			leftOfBlock--
 		}
 
-		if right-leftOfBlock+1 <= blockLen {
+		if right-leftOfBlock+1 <= freeChunkLen {
 			return leftOfBlock, right + 1, true
 		} else {
 			right = leftOfBlock - 1
