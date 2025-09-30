@@ -51,19 +51,19 @@ func TestCheckSum(t *testing.T) {
 	}
 }
 
-func TestStatsFreeChunk( t *testing.T) {
-	diskMap, _ := ReadFile("./test.txt")
+// func TestStatsFreeChunk( t *testing.T) {
+// 	diskMap, _ := ReadFile("./test.txt")
 
-	diskImg := MapToImg(diskMap)
+// 	diskImg := MapToImg(diskMap)
 
-	end, len := StatsFreeChunk(diskImg, 2)
-	wantEnd ,wantLen := 5, 3
+// 	end, len := StatsFreeChunk(diskImg, 2)
+// 	wantEnd ,wantLen := 5, 3
 
-	if end != wantEnd {
-		t.Errorf ("got %d want %d", end, wantEnd)
-	}
-	if len != wantLen {
-		t.Errorf ("got %d want %d", len, wantLen)
-		t.Errorf("%q", diskImg)
-	}
-}
+// 	if end != wantEnd {
+// 		t.Errorf ("got %d want %d", end, wantEnd)
+// 	}
+// 	if len != wantLen {
+// 		t.Errorf ("got %d want %d", len, wantLen)
+// 		t.Errorf("%q", diskImg)
+// 	}
+// }

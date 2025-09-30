@@ -1,6 +1,7 @@
 package advent9
 
 import (
+	"fmt"
 	"os"
 	"slices"
 )
@@ -57,88 +58,88 @@ func MapToImg(diskMap []rune) []rune {
 	return diskImg
 }
 
-func CompressDiskImg(diskImg []rune) []rune {
-	// set right to last element in slice
-	right := len(diskImg) - 1
-	// set left to first element
-	left := 0
+type Block struct{
+	firstElement 	int
+	lastElement		int
+	len				int
+}
 
-	// while left < right
-	for left < right {
-		// rightRunner = right
-		for diskImg[right] != FREESPACE && diskImg[left] == FREESPACE && left < right {
-
-			endFreeChunk, freeChunkLen := StatsFreeChunk(diskImg, left)
-			startBlock, endBlock, isMatch := TryFindFittingBlock(diskImg, right, freeChunkLen, endFreeChunk)
-			if isMatch {
-				tmp := slices.Clone(diskImg[left:endFreeChunk])
-				copy(diskImg[left:endFreeChunk], diskImg[startBlock:endBlock])
-				copy(diskImg[startBlock:endBlock], tmp)
-			} else {
-				right = EndOfPrevBlock(diskImg, right)
-			}
-
-			left += endBlock - startBlock
+func MapFiles(diskImg []rune)[]Block {
+	b := []Block{}
+	for i := 0 ; i < len(diskImg) ; i++ {
+		if diskImg[i] == FREESPACE {
+			continue
 		}
 
-		for diskImg[left] != FREESPACE && left < right {
-			left++
-		}
+		runner := i
 
-		for diskImg[right] == FREESPACE && right > left {
-			right--
+		for runner < len(diskImg) && diskImg[runner] == diskImg[i] {
+			runner++
 		}
+		runner--
+		b = append(b, Block{firstElement: i, lastElement: runner, len: runner - i + 1})
+		i = runner
 	}
+
+	return b
+}
+
+func FindNextFreeBlock(diskImg []rune, startSearchFrom int) (Block, bool) {
+	ret := Block{}
+
+	for i := startSearchFrom ; i < len(diskImg) ; i++ {
+		if diskImg[i] != FREESPACE {
+			continue
+		}
+		runner := i 
+		for runner < len(diskImg) && diskImg[runner] == diskImg[i] {
+			runner++
+		}
+		runner--
+		
+		b := Block{firstElement: i, lastElement: runner, len: runner - i + 1}
+		return b, true
+	}
+
+	return ret, false
+}
+
+func CompressDiskImg(diskImg []rune) []rune {
+
+	blocks := MapFiles(diskImg)
+	blockNumber := len(blocks) - 1
+	
+	for blockNumber >= 0 {
+		blockToMove := blocks[blockNumber]
+		freeBlock := Block{0,-1,0}
+		var ok bool
+		for freeBlock.lastElement < blockToMove.firstElement{
+			fmt.Println("Im here")
+
+			if freeBlock.len >= blockToMove.len {
+				tmp := slices.Clone(diskImg[freeBlock.firstElement:freeBlock.lastElement + 1])
+				copy(diskImg[freeBlock.firstElement:freeBlock.lastElement + 1], diskImg[blockToMove.firstElement : blockToMove.lastElement + 1])
+				copy(diskImg[blockToMove.firstElement : blockToMove.lastElement + 1], tmp)
+			}
+			
+			freeBlock, ok = FindNextFreeBlock(diskImg, freeBlock.lastElement + 1)
+			if !ok {
+				break
+			}
+		}
+		
+		blockNumber--
+	}
+
 	return diskImg
 }
 
-func EndOfPrevBlock(diskImg []rune, right int) int {
-	curr := diskImg[right]
-	for diskImg[right] == curr {
-		right--
-	}
-
-	return right
-}
-
-func TryFindFittingBlock(diskImg []rune, right, freeChunkLen, freeSpaceLimit int) (int, int, bool) {
-	leftOfBlock := right
-
-	for leftOfBlock > freeSpaceLimit {
-		for diskImg[leftOfBlock-1] == diskImg[right] {
-			leftOfBlock--
-		}
-
-		if right-leftOfBlock+1 <= freeChunkLen {
-			return leftOfBlock, right + 1, true
-		} else {
-			right = leftOfBlock - 1
-			leftOfBlock--
-			for diskImg[right] == FREESPACE {
-				right--
-				leftOfBlock--
-			}
-		}
-	}
-
-	return 0, 0, false
-}
-
-func StatsFreeChunk(diskImg []rune, left int) (int, int) {
-	end := left
-	for diskImg[end] == FREESPACE {
-		end++
-	}
-
-	blockLen := end - left
-	return end, blockLen
-}
 
 func CheckSum(diskImg []rune) int {
 	ret := 0
 	for i, v := range diskImg {
 		if v == FREESPACE {
-			break
+			continue
 		}
 
 		ret += i * ASCIIToInt(v)
