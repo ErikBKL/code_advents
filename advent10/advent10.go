@@ -17,48 +17,41 @@ func TotalTrailheadScore(pathToFile string) (int, error) {
 
 	score := 0
 	for _,trailhead := range trailheads {
-		score += TrailheadScore(mtx, trailhead)
+		TrailheadScore(mtx, trailhead, &score, matrix.UP)
 	}
 	return score, nil
 }
 
 
-func TrailheadScore(mtx *matrix.Matrix[rune], trailhead matrix.Point) int {
-	dir := matrix.UP
-
-	score := 0
-	for dir <= 6 {
-		if mtx.IsNextValid(dir, trailhead) {
-			RecTrailheadScore(mtx, mtx.NextPoint(dir, trailhead), &score, matrix.UP)
-		}
-		dir += 2
-	}
-	
-	return score
-}
-
-func RecTrailheadScore(mtx *matrix.Matrix[rune], current matrix.Point, score *int, direction matrix.Direction) {
-
-	for direction <= 6 {
-
-		if !mtx.IsNextValid(direction, current) {
-			return
-		}
-
-		next := mtx.NextPoint(direction, current)
-		if mtx.At(next.Y, next.X) + 1 != mtx.At(current.Y, current.X) {
-			return
+func TrailheadScore(mtx *matrix.Matrix[rune], current matrix.Point, score *int, dir matrix.Direction) {
+	// foreach direction of 4 directions:
+	for i := 0 ; i < 4 ; i++ {
+		// get next point in dir
+		next := mtx.NextPoint(dir, current)
+		// if next is not valid:
+		if !mtx.IsNextValid(dir, current) {
+			// continue
+			dir = (dir + 2 ) % 8
+			continue
 		}
 		
-		//hapy path
-		if mtx.At(current.Y, current.X) == 9 {
+		
+		// if next + 1 != current:
+		if matrix.ASCIIToInt(mtx.At(next.Y, next.X)) - 1 != matrix.ASCIIToInt(mtx.At(current.Y, current.X)) && matrix.ASCIIToInt(mtx.At(current.Y, current.X)) != 9 {
+			// continue
+			dir = (dir + 2 ) % 8
+			continue
+		}
+	
+		if matrix.ASCIIToInt(mtx.At(current.Y, current.X)) == 9 {
 			*score++
 			return
 		}
-	
-		RecTrailheadScore(mtx, current, score, direction + 2)
+
+		TrailheadScore(mtx, next, score, matrix.UP)
 	}
 }
+
 
 func SpotAllZeroes(mtx *matrix.Matrix[rune]) []matrix.Point {
 	ret := []matrix.Point{}
