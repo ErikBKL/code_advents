@@ -114,7 +114,7 @@ func CompressDiskImg(diskImg []rune) []rune {
 		freeBlock := Block{0,-1,0}
 		var ok bool
 		for freeBlock.lastElement < blockToMove.firstElement{
-			fmt.Println("Im here")
+			// fmt.Println("Im here")
 
 			if freeBlock.len >= blockToMove.len {
 				tmp := slices.Clone(diskImg[freeBlock.firstElement:freeBlock.lastElement + 1])
@@ -124,6 +124,7 @@ func CompressDiskImg(diskImg []rune) []rune {
 			
 			freeBlock, ok = FindNextFreeBlock(diskImg, freeBlock.lastElement + 1)
 			if !ok {
+				// fmt.Println("BREAKING")
 				break
 			}
 		}

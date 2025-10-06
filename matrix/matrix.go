@@ -1,5 +1,9 @@
 package matrix
 
+import (
+	"os"
+	"bufio"
+)
 type Point struct {
 	X int
 	Y int
@@ -117,4 +121,41 @@ func (m *Matrix[T])IdxToPoint(idx int) Point {
 		X: idx % m.Rows,
 		Y: idx/m.Rows,
 	}
+}
+
+
+func FileToMatrix(pathToFile string) (*Matrix[rune], error) {
+
+	file, err := os.Open(pathToFile)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	mtx := New[rune]()
+	isMatrixResize := false
+	rowToInsert := 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		runeLine := []rune(line)
+
+		if !isMatrixResize {
+			mtx.Resize(len(runeLine), len(runeLine))
+			isMatrixResize = true
+		}
+
+		for col, v := range runeLine {
+			mtx.Set(rowToInsert, col, v)
+		}
+		rowToInsert++
+	}
+
+	return mtx, nil
+}
+
+func ASCIIToInt(n rune) int {
+	return int(n - '0')
 }

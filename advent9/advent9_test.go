@@ -47,7 +47,7 @@ func TestCheckSum(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %d want %d", got, want)
-		t.Errorf("%q", diskImg)
+		// t.Errorf("%q", diskImg)
 	}
 }
 
