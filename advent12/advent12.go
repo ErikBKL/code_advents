@@ -1,6 +1,9 @@
 package advent12
 
 import (
+
+	"unicode"
+
 	matrix "erikberman.matrix.com"
 )
 
@@ -31,11 +34,11 @@ func RecGetRegion(mtx *matrix.Matrix[rune], current matrix.Point, area, perimete
 	
 	currValue := mtx.At(current.Y, current.X)
 	
-	if currValue == VISITED {
+	if unicode.IsLower(currValue) {
 		return
 	}
 	
-	mtx.Set(current.Y, current.X, VISITED)
+	mtx.Set(current.Y, current.X, unicode.ToLower(currValue))
 	(*area)++
 
 	for _,dir := range dirs {
@@ -47,7 +50,7 @@ func RecGetRegion(mtx *matrix.Matrix[rune], current matrix.Point, area, perimete
 		next := mtx.NextPoint(dir, current)
 		nextValue := mtx.At(next.Y, next.X)
 
-		if nextValue != currValue{
+		if nextValue != currValue && nextValue != unicode.ToLower(currValue){
 			// do ++ to permiter and continue
 			(*perimeter)++
 			continue
