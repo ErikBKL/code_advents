@@ -23,7 +23,10 @@ func TestReadFile (t *testing.T) {
 
 func TestSecurityFactor(t *testing.T) {
 
-	mtx := SecurityFactor("./test.txt")
-
-	t.Errorf("%+v", mtx.Data)
+	got := SecurityFactor("./test.txt")
+	want := 12
+	
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }

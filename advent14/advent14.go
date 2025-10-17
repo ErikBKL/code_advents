@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 	"strconv"
-	
+	// "fmt"
 	matrix "erikberman.matrix.com"
 )
 
@@ -14,20 +14,20 @@ type Guard struct {
 	Vy		int
 }
 
-func SecurityFactor(pathToFile string) (*matrix.Matrix[int]){
+func SecurityFactor(pathToFile string) (int){
 	mtx := matrix.New[int]()
-	mtx.Resize(7, 11)
+	mtx.Resize(103, 101)
 
 	file, err := os.Open(pathToFile)
 	if err != nil {
-		return nil
+		return -1
 	}
 	defer file.Close()
 
 	// Read the file and extract a slice of guards
 	guards, err := ReadFile(file)
 	if err != nil {
-		return nil
+		return -1
 	}
 	// Foreach guard in guards (repeat 100 times):
 	
@@ -35,28 +35,53 @@ func SecurityFactor(pathToFile string) (*matrix.Matrix[int]){
 	
 	PlaceGuardsOnBoard(mtx, guards)
 
+	// fmt.Printf("mtx: %+v", mtx.Data)
 	m := SumQuadrants(mtx)
 	
-	return mtx
+	ret := 1
+	for _,v := range m {
+		ret *= v
+	}
+	return ret
 }
 
 func SumQuadrants(mtx *matrix.Matrix[int]) map[int]int {
 	ret := map[int]int{}
-	rowsInQuad := mtx.Rows/2
-	ColsInQuad := mtx.Cols/2
 
-	// 
+	// foreach idx from 0 to cols * rows/2:
+	for i := 0 ; i < mtx.Cols * (mtx.Rows/2) ; i++ {
+		// if idx % cols == cols/2
+		switch {
+		case i % mtx.Cols == mtx.Cols/2: //blank line
+			continue
+		case i % mtx.Cols < mtx.Cols/2 : //left quadrant
+			p := mtx.IdxToPoint(i)
+			ret[0] += mtx.At(p.Y, p.X)
+		default: //right quadrant
+			p := mtx.IdxToPoint(i)
+			ret[1] += mtx.At(p.Y, p.X)
+		}
+	}
 
-	// 1st quadrant top-left is 0
-	map[0] = SumSpecificQuadrant(mtx, 0,)
-	// 2nd quadrant top-left is 1st quadrant + colsInQuad + 1
-	// 3rd quadrant top-left is 0 + cols * (rowsInQuad  + 1)
-	// 4th quadrant top-left is 3rd quadrant + colsInQuad + 1
+	// fmt.Printf("map part 1 is: %+v", ret)
+
+	for i := mtx.Cols * (mtx.Rows/2 + 1) ; i < len(mtx.Data) ; i++ {
+
+		switch {
+		case i % mtx.Cols == mtx.Cols/2: //blank line
+			continue
+		case i % mtx.Cols < mtx.Cols/2 : //left quadrant
+			p := mtx.IdxToPoint(i)
+			ret[2] += mtx.At(p.Y, p.X)
+		default: //right quadrant
+			p := mtx.IdxToPoint(i)
+			ret[3] += mtx.At(p.Y, p.X)
+		}
+	}
+
+	return ret
 }
 
-func SumSpecificQuadrant(mtx *matrix.Matrix[int], idx int ) int {
-	for i := 0 ; i < len(mtx.Data)/4
-}
 
 func PlaceGuardsOnBoard(mtx *matrix.Matrix[int], guards []*Guard) {
 	for _,guard := range guards {
