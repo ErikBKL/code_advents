@@ -3,9 +3,12 @@ package advent13
 import (
 	"bufio"
 	"os"
+	"math"
 	"strings"
 	"strconv"
 	"reflect"
+	"gonum.org/v1/gonum/mat"
+
 )
 type Point struct{ 
 	X	int 
@@ -23,7 +26,7 @@ type Challange struct {
 const (
 	APRICE = 3
 	BPRICE = 1
-	OFFSET = 10000000000000
+	OFFSET = 10_000_000_000_000
 ) 
  
 
@@ -185,7 +188,7 @@ func ReadFilePt2(file *os.File ) ([]Challange, error) {
 			if err != nil {
 				return nil, err
 			}
-			ch.A.X = x
+			ch.A.X = x	
 			ch.A.Y = y
 		case strings.Contains(line, "Button B:"):
 			x,y,err := ExtractNumbers(line, "+")
@@ -217,6 +220,56 @@ func ReadFilePt2(file *os.File ) ([]Challange, error) {
 
 
 
+// func LowestPriceForMaxPrizesPt2(pathToFile string) (int,error) {
+// 	file, err := os.Open(pathToFile)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	challanges, err := ReadFilePt2(file)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	ret := 0
+// 	for _, ch := range challanges {
+// 		prices := []int{}
+// 		prices = MinPriceForChallange(ch, ch.Prize, Point{0,0}, prices)
+// 		if len(prices) > 1 {
+// 			ret += Min(prices[0], prices[1])
+// 		}
+// 	}
+
+// 	return ret, nil
+// }
+
+// func MinPriceForChallange(ch Challange, target, current Point, prices []int) []int {
+// 	buttons := []Point{ch.A, ch.B}
+
+// 	for i,button := range buttons {
+
+// 		if 	current.Y > target.Y || 
+// 			current.X > target.X {
+// 			return prices
+// 		}
+	
+// 		if current == target {
+// 			prices = append(prices, APRICE * ch.Moves[0] + BPRICE * ch.Moves[1])
+// 			return prices
+// 		}
+		
+// 		ch.Moves[i]++
+// 		prices = MinPriceForChallange(ch, ch.Prize, Point{X: current.X + button.X, Y: current.Y + button.Y}, prices)
+// 		ch.Moves[i]--
+// 	}
+	
+// 	return prices
+// }
+
+
+
+
+
 func LowestPriceForMaxPrizesPt2(pathToFile string) (int,error) {
 	file, err := os.Open(pathToFile)
 	if err != nil {
@@ -230,35 +283,34 @@ func LowestPriceForMaxPrizesPt2(pathToFile string) (int,error) {
 
 	ret := 0
 	for _, ch := range challanges {
-		prices := []int{}
-		prices = MinPriceForChallange(ch, ch.Prize, Point{0,0}, prices)
-		if len(prices) > 1 {
-			ret += Min(prices[0], prices[1])
+		presses := MinPriceForChallange(ch)
+		if presses != nil {
+			ret += presses[0] * APRICE + presses[1] * BPRICE
 		}
 	}
 
 	return ret, nil
 }
 
-func MinPriceForChallange(ch Challange, target, current Point, prices []int) []int {
-	buttons := []Point{ch.A, ch.B}
+func MinPriceForChallange(ch Challange) []int {
 
-	for i,button := range buttons {
+	ret := []int{}
+	mtx := mat.NewDense(2,2, []float64{float64(ch.A.X), float64(ch.B.X), float64(ch.A.Y), float64(ch.B.Y)})
+	vec := mat.NewVecDense(2, []float64{float64(ch.Prize.X), float64(ch.Prize.Y)})
+	var solution mat.VecDense
 
-		if current.Y > target.Y || current.X > target.X {
-			return prices
-		} 
-	
-		if current == target {
-			prices = append(prices, APRICE * ch.Moves[0] + BPRICE * ch.Moves[1])
-			return prices
-		}
-		
-		ch.Moves[i]++
-		prices = MinPriceForChallange(ch, ch.Prize, Point{X: current.X + button.X, Y: current.Y + button.Y}, prices)
-		ch.Moves[i]--
-
+	if err := solution.SolveVec(mtx, vec); err != nil {
+		return nil
 	}
-	
-	return prices
+
+	data := solution.RawVector().Data
+
+	a := int(math.Round(data[0]))
+	b := int(math.Round(data[1]))
+
+	if ch.A.X*a + ch.B.X*b != ch.Prize.X || ch.A.Y*a + ch.B.Y*b != ch.Prize.Y {
+		return nil
+	}
+
+	return []int{a,b}
 }
