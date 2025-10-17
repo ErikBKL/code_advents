@@ -2,20 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Go: Debug tests in advent10",
+      "name": "Go: Debug tests in advent14",
       "type": "go",
       "request": "launch",
       "mode": "test",
-      "program": "${workspaceFolder}/advent10",
-      "cwd": "${workspaceFolder}/advent10"
+      "program": "${workspaceFolder}/advent14",
+      "cwd": "${workspaceFolder}/advent14"
     },
     {
       "name": "Go: Debug single test (TotalTrailheadScore)",
       "type": "go",
       "request": "launch",
       "mode": "test",
-      "program": "${workspaceFolder}/advent10",
-      "cwd": "${workspaceFolder}/advent10",
+      "program": "${workspaceFolder}/advent14",
+      "cwd": "${workspaceFolder}/advent14",
       "args": ["-test.run", "TestTotalTrailheadScore"]
     }
   ]

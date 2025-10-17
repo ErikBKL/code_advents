@@ -118,8 +118,8 @@ func (m *Matrix[T])IsValidPoint( neighbor Point ) bool {
 
 func (m *Matrix[T])IdxToPoint(idx int) Point {
 	return Point{
-		X: idx % m.Rows,
-		Y: idx/m.Rows,
+		X: idx % m.Cols,
+		Y: idx/m.Cols,
 	}
 }
 
