@@ -1,10 +1,13 @@
 package advent14
+
+
 import (
 	"bufio"
 	"os"
 	"strings"
 	"strconv"
-	// "fmt"
+
+
 	matrix "erikberman.matrix.com"
 )
 
@@ -35,7 +38,6 @@ func SecurityFactor(pathToFile string) (int){
 	
 	PlaceGuardsOnBoard(mtx, guards)
 
-	// fmt.Printf("mtx: %+v", mtx.Data)
 	m := SumQuadrants(mtx)
 	
 	ret := 1
@@ -63,7 +65,6 @@ func SumQuadrants(mtx *matrix.Matrix[int]) map[int]int {
 		}
 	}
 
-	// fmt.Printf("map part 1 is: %+v", ret)
 
 	for i := mtx.Cols * (mtx.Rows/2 + 1) ; i < len(mtx.Data) ; i++ {
 
